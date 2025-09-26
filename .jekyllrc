@@ -1,0 +1,113 @@
+newpost() {
+  if [ -z "$1" ]; then
+    echo "Usage: newpost \"Document Title\""
+    return 1
+  fi
+  filename=$(echo "$1" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | sed 's/[^a-z0-9_-]//g')
+  touch "${filename}.md"
+  echo "Created: ${filename}.md"
+}
+
+# Function to convert the latest modified PNG in a source folder
+# to WebP, using a derived filename from the latest modified file
+# in a destination folder.
+#
+# Arguments:
+#   $1: Source folder containing PNG images
+#   $2: Destination folder containing files to derive WebP output name
+function convert_latest_png_to_webp_from_destination_name() {
+    local source_folder="$1"
+    local destination_folder="$2"
+    local output_dir="assets/images" # Fixed output directory within current working directory
+
+    # --- Input Validation ---
+    if [[ -z "$source_folder" || -z "$destination_folder" ]]; then
+        echo "Usage: convert_latest_png_to_webp_from_destination_name <source_folder> <destination_folder>"
+        return 1
+    fi
+
+    if [[ ! -d "$source_folder" ]]; then
+        echo "Error: Source folder '$source_folder' does not exist or is not a directory."
+        return 1
+    fi
+
+    if [[ ! -d "$destination_folder" ]]; then
+        echo "Error: Destination folder '$destination_folder' does not exist or is not a directory."
+        return 1
+    fi
+
+    # Ensure cwebp is installed
+    if ! command -v cwebp &> /dev/null; then
+        echo "Error: cwebp is not installed. Please install it using 'brew install webp'."
+        return 1
+    fi
+
+    # --- Find the latest modified PNG in the source folder ---
+    local latest_png_path
+    # latest_png_path=$(find "$source_folder" -type f -name "*.png" -print0 | xargs -0 stat -f "%m %N" | sort -rn | head -n 1 | awk '{print $NF}')
+    latest_png_path=$(ls -tr "$source_folder"/*.png 2>/dev/null | tail -n 1)
+
+    if [[ -z "$latest_png_path" ]]; then
+        echo "No PNG files found in '$source_folder'."
+        return 1
+    fi
+    echo "Found latest PNG in source: '$latest_png_path'"
+
+    # --- Find the latest modified file in the destination folder ---
+    local latest_dest_file_path
+    latest_dest_file_path=$(find "$destination_folder" -type f -print0 | xargs -0 stat -f "%m %N" | sort -rn | head -n 1 | awk '{print $NF}')
+
+    if [[ -z "$latest_dest_file_path" ]]; then
+        echo "No files found in '$destination_folder'. Cannot derive output filename."
+        return 1
+    fi
+    echo "Found latest file in destination: '$latest_dest_file_path'"
+
+    # --- Derive the output WebP filename ---
+    local dest_filename
+    dest_filename=$(basename "$latest_dest_file_path")
+
+    # 1) Strip extension
+    local base_name="${dest_filename%.*}"
+
+    # 2) Strip any characters matching [0-9\-]+ from the beginning of a filename
+    # This regex matches one or more digits or hyphens from the start of the string.
+    local clean_name=$(echo "$base_name" | sed -E 's/^[0-9-]+//')
+
+    # 3) Use resulting string as webp output filename
+    local output_webp_filename="${clean_name}.webp"
+
+    # 4) Use 'images' folder in a current directory as a destination folder
+    mkdir -p "$output_dir"
+    local output_webp_path="${output_dir}/${output_webp_filename}"
+
+    echo "Derived output WebP filename: '$output_webp_filename'"
+    echo "Full output path: '$output_webp_path'"
+
+    # --- Perform the conversion ---
+    echo "Converting '$latest_png_path' to '$output_webp_path'..."
+    if cwebp -q 80 "$latest_png_path" -o "$output_webp_path"; then
+        echo "Conversion successful: '$output_webp_path'"
+    else
+        echo "Error: cwebp conversion failed."
+        return 1
+    fi
+}
+
+# --- How to use the function ---
+# 1. Save the code above into a file, e.g., `png_to_webp_converter.sh`
+# 2. Make it executable: `chmod +x png_to_webp_converter.sh`
+# 3. Source it in your current shell session or add it to your .bashrc/.zshrc:
+#    `source png_to_webp_converter.sh`
+# 4. Then you can call the function:
+#    `convert_latest_png_to_webp_from_destination_name "path/to/your/source_png_folder" "path/to/your/destination_files_folder"`
+
+# Example usage (uncomment to test, after creating some dummy files/folders):
+# mkdir -p my_source_pngs
+# mkdir -p my_dest_files
+# touch my_source_pngs/image1.png
+# touch my_source_pngs/another_image_modified_later.png # This should be picked
+# touch my_dest_files/123-file-name-example.txt
+# touch my_dest_files/456-another-file_modified_later.pdf # This should be picked
+
+# convert_latest_png_to_webp_from_destination_name "my_source_pngs" "my_dest_files"
