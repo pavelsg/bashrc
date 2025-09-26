@@ -31,3 +31,6 @@ parse_git_branch() {
 # — PS1: user@host cwd (branch) $
 export PS1="${GREEN}\u@\h ${BLUE}\w${YELLOW}\$(parse_git_branch) ${RESET}\$ "
 
+if [ -f ~/.jekyllrc ]; then
+  source ~/.jekyllrc
+fi
