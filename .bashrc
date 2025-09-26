@@ -1,6 +1,7 @@
 # — Aliases
 alias ll='ls -la'
 alias k=kubectl
+alias whatismyip="echo $(curl ifconfig.me 2> /dev/null)"
 
 # — Bash completion
 if [ -f /etc/bash_completion ]; then
