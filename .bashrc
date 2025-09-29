@@ -21,6 +21,10 @@ YELLOW='\[\e[33m\]'   # yellow
 BLUE='\[\e[34m\]'     # blue
 RESET='\[\e[0m\]'     # reset
 
+# Java shortcuts
+j8()  { export JAVA_HOME=$(/usr/libexec/java_home -v 1.8); export PATH="$JAVA_HOME/bin:$PATH"; java -version; }
+j24() { export JAVA_HOME=$(/usr/libexec/java_home -v 24);  export PATH="$JAVA_HOME/bin:$PATH"; java -version; }
+
 # — Git branch helper
 parse_git_branch() {
   local branch
