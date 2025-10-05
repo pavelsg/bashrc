@@ -2,6 +2,7 @@
 alias ll='ls -la'
 alias k=kubectl
 alias whatismyip="echo $(curl ifconfig.me 2> /dev/null)"
+alias loadkeys="for key in $(ls ~/.ssh/*.pem); do ssh-add $key; done"
 
 # — Bash completion
 if [ -f /etc/bash_completion ]; then
