@@ -1,3 +1,5 @@
+alias publish='bundle exec jekyll clean && bundle exec jekyll build && wrangler pages deploy _site/ --project-name=beyonditopscom --branch=main'
+
 newpost() {
   if [ -z "$1" ]; then
     echo "Usage: newpost \"Document Title\""
