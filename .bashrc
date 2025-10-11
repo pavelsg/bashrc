@@ -2,6 +2,7 @@
 alias ll='ls -la'
 alias k=kubectl
 alias whatismyip="echo $(curl ifconfig.me 2> /dev/null)"
+alias myips="ip a l | grep inet"
 alias loadkeys="for key in $(ls ~/.ssh/*.pem); do ssh-add $key; done"
 alias activate="source .venv/bin/activate"
 
