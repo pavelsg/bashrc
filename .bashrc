@@ -91,3 +91,37 @@ genpass() {
     cat /dev/urandom | tr -dc "$char_set" | head -c "$length"
     echo # Add a newline after the password
 }
+
+png2jpg() {
+    if [ $# -eq 0 ]; then
+        echo "Error: Please provide at least one PNG file or a directory."
+        echo "Usage: png2jpg <file1.png> [file2.png ...] or png2jpg [directory]"
+        return 1
+    fi
+
+    # Case 1: If a directory is passed, process all PNGs inside it
+    if [ -d "$1" ]; then
+        local dir="$1"
+        # Check if there are actually PNGs in the directory
+        if ! ls "$dir"/*.png &>/dev/null; then
+            echo "No PNG files found in directory: $dir"
+            return 1
+        fi
+        echo "Processing all PNGs in directory: $dir"
+        for img in "$dir"/*.png; do
+            sips -s format jpeg "$img" --out "${img%.png}.jpg" &>/dev/null
+            echo "Converted: $img -> ${img%.png}.jpg"
+        done
+        return 0
+    fi
+
+    # Case 2: Process individual files passed as arguments
+    for img in "$@"; do
+        if [ -f "$img" ] && [[ "$img" == *.png ]]; then
+            sips -s format jpeg "$img" --out "${img%.png}.jpg" &>/dev/null
+            echo "Converted: $img -> ${img%.png}.jpg"
+        else
+            echo "Skipping (not a valid PNG file): $img"
+        fi
+    done
+}
