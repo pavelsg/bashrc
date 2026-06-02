@@ -3,7 +3,7 @@ alias ll='ls -la'
 alias k=kubectl
 alias whatismyip="echo $(curl ifconfig.me 2> /dev/null)"
 alias myips="ip a l | grep inet"
-alias loadkeys="for key in $(ls ~/.ssh/*.pem); do ssh-add $key; done"
+
 alias activate="source .venv/bin/activate"
 
 # — Bash completion
@@ -124,4 +124,15 @@ png2jpg() {
             echo "Skipping (not a valid PNG file): $img"
         fi
     done
+}
+
+loadkeys() {
+    # Check if any .pem files actually exist to avoid "No such file or directory" errors
+    if [ -f ~/.ssh/*.pem ] 2>/dev/null || compgen -G "$HOME/.ssh/*.pem" >/dev/null; then
+        for key in ~/.ssh/*.pem; do
+            ssh-add "$key"
+        done
+    else
+        echo "No .pem keys found in ~/.ssh/"
+    fi
 }
