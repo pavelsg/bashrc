@@ -137,6 +137,6 @@ loadkeys() {
 }
 
 whatismyip() {
-    curl -s ifconfig.me
+    curl -s -4 ifconfig.me
     echo
 }
