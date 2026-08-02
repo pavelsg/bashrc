@@ -1,7 +1,6 @@
 # — Aliases
 alias ll='ls -la'
 alias k=kubectl
-alias whatismyip="echo $(curl ifconfig.me 2> /dev/null)"
 alias myips="ip a l | grep inet"
 
 alias activate="source .venv/bin/activate"
@@ -135,4 +134,9 @@ loadkeys() {
     else
         echo "No .pem keys found in ~/.ssh/"
     fi
+}
+
+whatismyip() {
+    curl -s ifconfig.me
+    echo
 }
