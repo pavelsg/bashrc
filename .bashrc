@@ -44,51 +44,8 @@ if [ -f ~/.jekyllrc ]; then
 fi
 
 # Function to generate a random password
-# Usage: genpass <length> [--no-shell-chars]
-#   --no-shell-chars: Omits characters problematic in various contexts
-#                     (e.g., shell, URL, query strings)
 genpass() {
-    local length=${1:-16} # Default to 16
-    local exclude_shell_chars=0
-    local char_set=''
-
-    if [[ "$2" == "--no-shell-chars" ]]; then
-        exclude_shell_chars=1
-    fi
-
-    # Define the core character sets
-    local lower='a-z'
-    local upper='A-Z'
-    local digit='0-9'
-
-    # Symbols that are generally safe or desired
-    local safe_symbols='!*-_=~'
-
-    # Build the full character set
-    char_set="${lower}${upper}${digit}"
-
-    if [[ "$exclude_shell_chars" -eq 0 ]]; then
-        # Standard mode: Include safe symbols
-        char_set="${char_set}${safe_symbols}"
-    else
-        # No Shell Chars mode: Define all characters to exclude.
-        # This list includes original shell problems AND your requested characters.
-        # Characters: ^$"`'&;|<>()[]{}#\\/ :@?%+
-        # ANSI C Quoting ($'...') handles the difficult characters reliably.
-        local problem_chars=$'\'^$"`;&|<>()[]{}#\\/:@?%+'
-
-        # Start with a full set of characters
-        local full_char_set="${char_set}${safe_symbols}#\\/ :@?%+"
-
-        # Use tr to filter out the problematic characters
-        char_set=$(echo "$full_char_set" | tr -d "$problem_chars")
-    fi
-
-    # Generate the password using /dev/urandom
-    # tr -dc: delete all characters *except* those specified in the set
-    # head -c: take only the first N characters (the desired length)
-    cat /dev/urandom | tr -dc "$char_set" | head -c "$length"
-    echo # Add a newline after the password
+  python3 -c "import secrets, sys; n=int(sys.argv[1]); print(secrets.token_urlsafe(n)[:n])" "${1:-32}"
 }
 
 png2jpg() {
